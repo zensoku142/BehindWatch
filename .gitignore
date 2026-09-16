@@ -1,0 +1,17 @@
+.venv/
+.runtime/
+__pycache__/
+*.pyc
+models/*
+!models/.gitkeep
+*.log
+*.mp4
+*.jpg
+*.png
+.env
+.env.*
+.idea/
+.vscode/
+work/
+dist/
+build/
