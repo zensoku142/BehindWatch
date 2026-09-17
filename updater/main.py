@@ -14,6 +14,11 @@ def main(argv=None):
     if args.wait_pid <= 0 or not args.installer.is_file():
         return 1
     kernel = ctypes.windll.kernel32
+    kernel.OpenProcess.argtypes = (ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong)
+    kernel.OpenProcess.restype = ctypes.c_void_p
+    kernel.WaitForSingleObject.argtypes = (ctypes.c_void_p, ctypes.c_ulong)
+    kernel.WaitForSingleObject.restype = ctypes.c_ulong
+    kernel.CloseHandle.argtypes = (ctypes.c_void_p,)
     handle = kernel.OpenProcess(0x00100000, False, args.wait_pid)
     if handle:
         try:
@@ -21,10 +26,21 @@ def main(argv=None):
                 return 1
         finally:
             kernel.CloseHandle(handle)
-    # 安装器负责覆盖文件并只启动一次新程序；数据在用户目录，不参与替换。
-    return subprocess.call([str(args.installer), '/VERYSILENT', '/SUPPRESSMSGBOXES',
-                            '/NORESTART', '/BEHINDWATCHUPDATE'])
+    # 保留进度和错误窗口；旧版完全静默安装失败时，用户只会看到主程序关闭。
+    log = args.installer.with_suffix('.log')
+    return subprocess.call([str(args.installer), '/SILENT', '/NORESTART',
+                            '/BEHINDWATCHUPDATE', f'/LOG={log}'])
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        result = main()
+    except OSError as exc:
+        result = 1
+        detail = str(exc)
+    else:
+        detail = f'错误代码：{result}'
+    if result:
+        ctypes.windll.user32.MessageBoxW(None,
+            f'更新未完成：{detail}\n请从发布页手动下载安装包。', 'BehindWatch 更新', 0x10)
+    sys.exit(result)

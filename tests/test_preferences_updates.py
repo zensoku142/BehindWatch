@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core import preferences
 from core import autostart
 from updater import updates
+from updater import main as updater_main
 
 
 class PreferencesTests(unittest.TestCase):
@@ -125,6 +126,40 @@ class UpdateTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
                 updates.download_installer(release)
             self.assertEqual(list((Path(directory)/'BehindWatch'/'updates').iterdir()), [])
+
+    def test_updater_runs_outside_installed_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            installed = root / 'installed'
+            installed.mkdir()
+            executable = installed / 'BehindWatch.exe'
+            executable.touch()
+            (installed / 'BehindWatchUpdater.exe').write_bytes(b'helper')
+            cache = root / 'updates'
+            cache.mkdir()
+            installer = cache / 'BehindWatch-Setup-v1.2.3-x64.exe'
+            installer.touch()
+            with patch.object(updates.sys, 'frozen', True, create=True), \
+                 patch.object(updates.sys, 'executable', str(executable)), \
+                 patch('updater.updates.subprocess.Popen') as launch:
+                updates.launch_installer(installer)
+            detached = cache / 'BehindWatchUpdater.exe'
+            self.assertEqual(detached.read_bytes(), b'helper')
+            self.assertEqual(launch.call_args.args[0][0], str(detached))
+            self.assertEqual(launch.call_args.args[0][-2:], ['--installer', str(installer)])
+
+    def test_update_installer_shows_progress_and_records_log(self):
+        with tempfile.TemporaryDirectory() as directory:
+            installer = Path(directory) / 'BehindWatch-Setup-v1.2.3-x64.exe'
+            installer.touch()
+            with patch('updater.main.ctypes.windll') as windll, \
+                 patch('updater.main.subprocess.call', return_value=0) as launch:
+                windll.kernel32.OpenProcess.return_value = 0
+                self.assertEqual(updater_main.main(['--wait-pid', '123', '--installer', str(installer)]), 0)
+            command = launch.call_args.args[0]
+            self.assertIn('/SILENT', command)
+            self.assertIn('/BEHINDWATCHUPDATE', command)
+            self.assertIn(f'/LOG={installer.with_suffix(".log")}', command)
 
     def test_translation_placeholders_and_system_resolution(self):
         from string import Formatter

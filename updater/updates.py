@@ -3,6 +3,7 @@ import json
 import re
 import hashlib
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -115,7 +116,10 @@ def launch_installer(path):
     helper = Path(sys.executable).with_name('BehindWatchUpdater.exe')
     if not helper.is_file():
         raise FileNotFoundError(helper)
-    subprocess.Popen([str(helper), '--wait-pid', str(os.getpid()), '--installer', str(path)],
+    # 安装器会覆盖程序目录；更新器必须从目录外运行，才能等旧程序退出并完成替换。
+    detached_helper = path.parent / helper.name
+    shutil.copy2(helper, detached_helper)
+    subprocess.Popen([str(detached_helper), '--wait-pid', str(os.getpid()), '--installer', str(path)],
                      creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
 
 
