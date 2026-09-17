@@ -5,8 +5,9 @@ from PyInstaller.utils.hooks import copy_metadata
 
 root = Path(SPECPATH).parents[1]
 datas = [(str(root / 'models' / name), 'models')
-         for name in ('person_yolox.onnx', 'face.task', 'sface.onnx')]
+         for name in ('yolo26s.onnx', 'face.task', 'sface.onnx')]
 datas.append((str(root / 'core' / 'vendor' / 'LICENSE-YOLOX'), 'licenses'))
+datas.append((str(root / 'packaging' / 'licenses' / 'AGPL-3.0.txt'), 'licenses'))
 datas += [(str(root / name), 'licenses') for name in
           ('THIRD_PARTY_NOTICES.md', 'LICENSE-SeatSentinel.txt', 'LICENSE-TokenMeter.txt')]
 datas += copy_metadata('supervision')

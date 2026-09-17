@@ -35,7 +35,7 @@ def build_onedir(version):
     shutil.copy2(ROOT / 'dist' / 'BehindWatchUpdater.exe', DIST / 'BehindWatchUpdater.exe')
     if not (DIST / 'BehindWatch.exe').is_file():
         raise FileNotFoundError('Main executable was not built')
-    for name in ('person_yolox.onnx', 'face.task', 'sface.onnx'):
+    for name in ('yolo26s.onnx', 'face.task', 'sface.onnx'):
         if not (DIST / '_internal' / 'models' / name).is_file():
             raise FileNotFoundError(f'Packaged model missing: {name}')
     for path in ('PySide6/Qt6Core.dll', 'PySide6/plugins/platforms/qwindows.dll'):

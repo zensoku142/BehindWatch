@@ -1,4 +1,4 @@
-"""Local YOLOX detection, ByteTrack tracking and MediaPipe face landmarks."""
+"""Local YOLO26s detection, ByteTrack tracking and MediaPipe face landmarks."""
 from pathlib import Path
 import math
 import time
@@ -18,7 +18,7 @@ class Detector:
         self.mp = mp
         base, vision = mp.tasks.BaseOptions, mp.tasks.vision
         from core.person_detection import PersonDetector
-        self.people = PersonDetector(ROOT/'models/person_yolox.onnx')
+        self.people = PersonDetector(ROOT/'models/yolo26s.onnx')
         self.faces = vision.FaceLandmarker.create_from_options(vision.FaceLandmarkerOptions(
             base_options=base(model_asset_path=str(ROOT/'models/face.task')),
             running_mode=vision.RunningMode.VIDEO, num_faces=6,

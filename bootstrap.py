@@ -82,7 +82,7 @@ def ensure_runtime():
         # 安装版自带解释器和依赖，不能重启到开发目录的虚拟环境。
         return
     root = Path(__file__).resolve().parent
-    missing = [name for name in ('cv2', 'mediapipe', 'supervision', 'PIL', 'PySide6', 'cv2_enumerate_cameras', 'win11toast', 'win32gui', 'comtypes')
+    missing = [name for name in ('cv2', 'mediapipe', 'onnxruntime', 'supervision', 'PIL', 'PySide6', 'cv2_enumerate_cameras', 'win11toast', 'win32gui', 'comtypes')
                if importlib.util.find_spec(name) is None]
     if missing:
         expected = root / '.venv' / 'Scripts' / 'python.exe'

@@ -5,8 +5,8 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1] / 'models'
 MODELS = {
-    'person_yolox.onnx': ('https://media.githubusercontent.com/media/opencv/opencv_zoo/47534e27c9851bb1128ccc0102f1145e27f23f98/models/object_detection_yolox/object_detection_yolox_2022nov.onnx',
-                         'c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063'),
+    'yolo26s.onnx': ('https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s.onnx',
+                     'd26b65c432111eb95798cd2320603d4d75627605dbec6c6b7f98c499a80e7321'),
     'face.task': ('https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
                   '64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff'),
     'sface.onnx': ('https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx',

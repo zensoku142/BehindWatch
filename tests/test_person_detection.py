@@ -10,11 +10,20 @@ class PersonDetectionTests(unittest.TestCase):
     def test_coordinates_restore_after_letterbox(self):
         from types import SimpleNamespace
         detector = PersonDetector.__new__(PersonDetector)
-        detector.model = SimpleNamespace(infer=lambda image: np.array([
-            [160, 80, 160, 160, .8, 0], [0, 0, 20, 20, .9, 2]]))
-        result = detector.detect(np.zeros((240, 320, 3), dtype=np.uint8))
+        blobs = []
+        detector.input_name = 'images'
+        def run(_, inputs):
+            blobs.append(inputs['images'])
+            return [np.array([[[160, 80, 320, 240, .8, 0], [0, 0, 20, 20, .9, 2],
+                               [20, 20, 40, 40, .05, 0]]])]
+        detector.model = SimpleNamespace(run=run)
+        frame = np.zeros((240, 320, 3), dtype=np.uint8)
+        frame[0, 0] = (10, 20, 30)
+        result = detector.detect(frame)
         self.assertEqual(len(result), 1)
         np.testing.assert_allclose(result[0]['box'], (.25, 1/6, .5, .5))
+        self.assertEqual(blobs[0].shape, (1, 3, 640, 640))
+        np.testing.assert_allclose(blobs[0][0, :, 0, 0], (30/255, 20/255, 10/255))
 
     def test_bytetrack_keeps_id_through_low_scores_and_misses(self):
         tracker = PersonTracker()

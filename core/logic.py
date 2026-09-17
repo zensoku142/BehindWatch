@@ -244,28 +244,44 @@ class Monitor:
             elif source == 'body':
                 ratios = [(track.box[end]-track.box[start])/max(1e-9, old_box[end]-old_box[start])
                           for start, end in ((0, 2), (1, 3))]
-                if any(not .75 <= ratio <= 1.33 for ratio in ratios):
+                if any(not .5 <= ratio <= 2 for ratio in ratios):
                     track.motion.clear()
             track.motion_source = source
-            center = ((anchor[0]+anchor[2])/2, (anchor[1]+anchor[3])/2)
-            track.motion = [(at, point) for at, point in track.motion if now-at <= 1.8]
-            track.motion.append((now, center))
+            # 身体框上半部会随坐姿、遮挡改变；底部位置及两侧边界更能区分整个人平移与框形变。
+            point = ((anchor[0]+anchor[2])/2, (anchor[1]+anchor[3])/2 if use_face else anchor[3])
+            track.motion = [(at, sample) for at, sample in track.motion if now-at <= 1.8]
+            track.motion.append((now, (point, anchor)))
             track.moving = False
             if len(track.motion) >= 3 and now-track.motion[0][0] >= 1.0:
                 # 三个时间段取中位数，要求两段同向移动；单次框跳变、探身后停住及来回摇晃不算经过。
                 span = now-track.motion[0][0]
                 groups = [[], [], []]
-                for at, point in track.motion:
-                    groups[min(2, int(3*(at-track.motion[0][0])/span))].append(point)
+                for at, sample in track.motion:
+                    groups[min(2, int(3*(at-track.motion[0][0])/span))].append(sample)
                 if all(groups):
-                    points = [(median(p[0] for p in group), median(p[1] for p in group)) for group in groups]
+                    points = [(median(sample[0][0] for sample in group), median(sample[0][1] for sample in group))
+                              for group in groups]
+                    boxes = [tuple(median(sample[1][side] for sample in group) for side in range(4))
+                             for group in groups]
                     steps = [(b[0]-a[0], b[1]-a[1]) for a, b in zip(points, points[1:])]
                     lengths = [hypot(*step) for step in steps]
                     # 按目标自身大小适应远近；固定的整幅画面 6% 门槛会吞掉远处通道中的真实走动。
-                    threshold = max(.0125, (.9 if source == 'face' else .45)*(anchor[2]-anchor[0]))
+                    threshold = max(.0125, (.9 if source == 'face' else .4)*(anchor[2]-anchor[0]))
+                    edge_motion = True
+                    if source == 'body':
+                        dx = points[2][0]-points[0][0]
+                        dy = points[2][1]-points[0][1]
+                        # 一侧边界固定而另一侧漂移通常是坐姿或检测框形变，不应算作经过。
+                        if abs(dx) >= threshold*.7:
+                            edge_motion = min((boxes[2][side]-boxes[0][side])*dx for side in (0, 2)) >= .35*dx*dx
+                        else:
+                            edge_motion = (abs(dy) >= threshold and
+                                           (boxes[2][1]-boxes[0][1])*dy >= .35*dy*dy and
+                                           (boxes[2][3]-boxes[0][3])*dy >= .35*dy*dy)
                     track.moving = (hypot(points[2][0]-points[0][0], points[2][1]-points[0][1]) >= threshold
                                     and min(lengths) >= threshold*.25
-                                    and sum(a*b for a, b in zip(*steps)) >= .8*lengths[0]*lengths[1])
+                                    and sum(a*b for a, b in zip(*steps)) >= .8*lengths[0]*lengths[1]
+                                    and edge_motion)
             track.ignored = identity in self.ignored_ids
             if track.ignored:
                 track.moving = False

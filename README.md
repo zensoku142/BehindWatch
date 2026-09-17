@@ -6,7 +6,7 @@ Windows 10/11 x64 本地摄像头监测工具。选择本人、忽略固定同�
 
 ## 下载与开始使用
 
-从 [v0.1.0 发布页](https://github.com/zensoku142/BehindWatch/releases/tag/v0.1.0) 下载 `BehindWatch-Setup-v0.1.0-x64.exe`。安装包包含 Python 运行环境和本地模型，无需另装 Python；同页提供 `SHA256SUMS.txt`。
+从 [v0.1.3 发布页](https://github.com/zensoku142/BehindWatch/releases/tag/v0.1.3) 下载 `BehindWatch-Setup-v0.1.3-x64.exe`。安装包包含 Python 运行环境和本地模型，无需另装 Python；同页提供 `SHA256SUMS.txt`。
 
 1. 安装后点击 **开始监测**；设备不正确时到 **设置 → 摄像头** 选择。
 2. 点击 **选择本人**，再点击预览中自己的检测框。
@@ -59,4 +59,4 @@ py -3.12 -m pip --python .venv/Scripts/python.exe install -r requirements-build.
 - [第三方来源与许可证](THIRD_PARTY_NOTICES.md)
 - [提交与发布规范](GIT_VERSION_AND_MERGE_RULES.md)
 
-检测使用 OpenCV Zoo YOLOX、Supervision ByteTrack、MediaPipe Face Landmarker 和 SFace；界面使用 PySide6。复用代码及相应许可证随源码和安装包保留。
+检测使用 YOLO26s ONNX、Supervision ByteTrack、MediaPipe Face Landmarker 和 SFace；界面使用 PySide6。模型与复用代码的来源及许可证见 [第三方声明](THIRD_PARTY_NOTICES.md)。

@@ -107,6 +107,33 @@ class MonitorTests(unittest.TestCase):
             self.assertFalse(tracks[1].moving)
             self.assertEqual(events, [])
 
+    def test_seated_box_expansion_does_not_look_like_walking(self):
+        m = self.setup_owner()
+        for tick in range(1, 50):
+            right = .72 + min(tick, 25)*.004
+            tracks, events = m.update([A, {'box': (.52, .1, right, .7)}], tick/10)
+            self.assertFalse(tracks[1].moving)
+            self.assertEqual(events, [])
+
+    def test_distant_walker_with_moderate_box_resize_alerts(self):
+        m = self.setup_owner()
+        events = []
+        for tick in range(1, 22):
+            left = .55 + tick*.003
+            width = .08 + tick*.0015
+            _, new = m.update([A, {'box': (left, .15, left+width, .55)}], tick/10)
+            events.extend(new)
+        self.assertEqual([event['message'] for event in events], ['检测到人员走动'])
+
+    def test_person_walking_vertically_across_frame_alerts(self):
+        m = self.setup_owner()
+        events = []
+        for tick in range(1, 22):
+            top = .12 + tick*.004
+            _, new = m.update([A, {'box': (.55, top, .65, top+.3)}], tick/10)
+            events.extend(new)
+        self.assertEqual([event['message'] for event in events], ['检测到人员走动'])
+
     def test_ignore_survives_face_body_switches(self):
         m = self.setup_owner()
         face = (.7, .15, .78, .25)

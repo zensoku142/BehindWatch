@@ -1,14 +1,15 @@
-"""OpenCV Zoo YOLOX and Supervision ByteTrack adapters."""
+"""YOLO26s ONNX and Supervision ByteTrack adapters."""
 import cv2
 import numpy as np
+import onnxruntime as ort
 import supervision as sv
-
-from core.vendor.yolox import YoloX
 
 
 class PersonDetector:
     def __init__(self, model):
-        self.model = YoloX(str(model), confThreshold=.1, nmsThreshold=.45)
+        # OpenCV DNN 会错误执行 YOLO26s 端到端输出的 TopK，真实画面产生重复框甚至直接报错。
+        self.model = ort.InferenceSession(str(model), providers=['CPUExecutionProvider'])
+        self.input_name = self.model.get_inputs()[0].name
 
     def detect(self, frame):
         h, w = frame.shape[:2]
@@ -17,13 +18,16 @@ class PersonDetector:
         padded = np.full((640, 640, 3), 114, dtype=np.uint8)
         resized = cv2.resize(frame, (round(w*scale), round(h*scale)))
         padded[:resized.shape[0], :resized.shape[1]] = resized
-        results = self.model.infer(cv2.cvtColor(padded, cv2.COLOR_BGR2RGB).astype(np.float32))
+        blob = cv2.dnn.blobFromImage(padded, scalefactor=1/255,
+                                     size=(640, 640), swapRB=True)
+        # 官方 NMS-free ONNX 输出为 xyxy、置信度、类别；保留低分人框供 ByteTrack 延续轨迹。
+        results = self.model.run(None, {self.input_name: blob})[0].reshape(-1, 6)
         observations = []
-        for x, y, width, height, score, category in results:
-            if int(category) != 0:
+        for x1, y1, x2, y2, score, category in results:
+            if int(category) != 0 or score < .1:
                 continue
-            box = (max(0., x/scale/w), max(0., y/scale/h),
-                   min(1., (x+width)/scale/w), min(1., (y+height)/scale/h))
+            box = (max(0., x1/scale/w), max(0., y1/scale/h),
+                   min(1., x2/scale/w), min(1., y2/scale/h))
             if box[2] > box[0] and box[3] > box[1]:
                 observations.append({'box': box, 'confidence': float(score), 'facing': False})
         return observations

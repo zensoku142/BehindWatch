@@ -9,7 +9,7 @@ $digest = (Get-FileHash -LiteralPath $requirements -Algorithm SHA256).Hash
 $needsInstall = -not (Test-Path -LiteralPath $marker)
 if (-not $needsInstall) { $needsInstall = (Get-Content -LiteralPath $marker -Raw).Trim() -ne $digest }
 if ((Test-Path -LiteralPath $venvPython) -and -not $needsInstall) {
-    & $venvPython -c 'import cv2, mediapipe, supervision, PIL, PySide6, cv2_enumerate_cameras, win11toast, win32gui, comtypes'
+    & $venvPython -c 'import cv2, mediapipe, onnxruntime, supervision, PIL, PySide6, cv2_enumerate_cameras, win11toast, win32gui, comtypes'
     $needsInstall = $LASTEXITCODE -ne 0
 }
 if (-not (Test-Path -LiteralPath $venvPython) -or $needsInstall) {
