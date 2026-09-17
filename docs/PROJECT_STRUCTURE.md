@@ -47,3 +47,5 @@ BehindWatch/
 5. 验证通过后创建并推送未使用的 vX.Y.Z Tag。Tag 流水线再次验证并发布，随后核对 Release 正文、安装器、SHA256SUMS.txt 和 Tag 指向。
 
 当前源码的更新页显示“开发版本”；安装包版本来自构建时的 version.txt，不能通过手改源码伪装已安装版本。
+
+0.1.0 发布前已在 [GitHub Windows 干净环境](https://github.com/zensoku142/BehindWatch/actions/runs/35180375964)完成上述安装验证。本机检测到已有安装注册，未覆盖现有安装；本地验证仅使用 onedir 自检。
