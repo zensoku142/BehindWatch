@@ -6,8 +6,7 @@ models/*
 !models/.gitkeep
 *.log
 *.mp4
-*.jpg
-*.png
+# 本机截图放 work/ 或 .runtime/；正式文档图片和图标可以提交。
 .env
 .env.*
 .idea/
@@ -15,3 +14,18 @@ models/*
 work/
 dist/
 build/
+dist-installer/
+design-qa.md
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+*.download
+*.dmp
+*.pem
+*.key
+*.pfx
+*.p12
+owner_face.bin
+preferences.json

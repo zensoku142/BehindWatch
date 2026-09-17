@@ -9,7 +9,7 @@ $digest = (Get-FileHash -LiteralPath $requirements -Algorithm SHA256).Hash
 $needsInstall = -not (Test-Path -LiteralPath $marker)
 if (-not $needsInstall) { $needsInstall = (Get-Content -LiteralPath $marker -Raw).Trim() -ne $digest }
 if ((Test-Path -LiteralPath $venvPython) -and -not $needsInstall) {
-    & $venvPython -c 'import cv2, mediapipe, PIL, pystray, cv2_enumerate_cameras'
+    & $venvPython -c 'import cv2, mediapipe, supervision, PIL, PySide6, cv2_enumerate_cameras, win11toast, win32gui, comtypes'
     $needsInstall = $LASTEXITCODE -ne 0
 }
 if (-not (Test-Path -LiteralPath $venvPython) -or $needsInstall) {
@@ -41,7 +41,7 @@ if (-not (Test-Path -LiteralPath $venvPython) -or $needsInstall) {
     if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed. Check your network and rerun launch.cmd.' }
     Set-Content -LiteralPath $marker -Value $digest -Encoding ASCII
 }
-& $venvPython (Join-Path $PSScriptRoot 'download_models.py')
+& $venvPython (Join-Path $PSScriptRoot 'scripts\download_models.py')
 if ($LASTEXITCODE -ne 0) { throw 'Model download or integrity verification failed.' }
 $env:MPLCONFIGDIR = Join-Path $PSScriptRoot '.runtime\matplotlib'
 New-Item -ItemType Directory -Force -Path $env:MPLCONFIGDIR | Out-Null
