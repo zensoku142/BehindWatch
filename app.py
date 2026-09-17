@@ -1664,18 +1664,27 @@ if __name__ == '__main__':
         window = App()
         window.quit()
         sys.exit(0)
-    from bootstrap import acquire_single_instance, release_single_instance
+    from bootstrap import (acquire_single_instance, activation_requested, create_activation_event,
+                           release_single_instance, signal_existing_instance)
     instance_handle = acquire_single_instance()
     if instance_handle is None:
-        # 与 TokenMeter 一样明确说明重复启动，而不是让开发运行静默结束。
-        message = startup_running_message('BehindWatch', load_preferences()['language'])
-        ctypes.windll.user32.MessageBoxW(None, message, 'BehindWatch', 0x40)
+        # 已隐藏的实例仍持有互斥量；重复启动时请求它显示面板，事件尚未就绪才提示。
+        if not signal_existing_instance():
+            message = startup_running_message('BehindWatch', load_preferences()['language'])
+            ctypes.windll.user32.MessageBoxW(None, message, 'BehindWatch', 0x40)
         sys.exit(0)
+    activation_handle = None
     try:
+        activation_handle = create_activation_event()
         application = QApplication(sys.argv)
         # 与 TokenMeter 一样保留 Windows 原生 Qt 风格，包括圆角下拉菜单和选中指示。
         window = App()
         window.show()
+        # Windows 事件可在界面初始化期间收到请求；由 GUI 线程轮询并操作窗口。
+        activation_timer = QTimer(window)
+        activation_timer.timeout.connect(lambda: window.show_panel() if activation_requested(activation_handle) else None)
+        activation_timer.start(150)
         sys.exit(application.exec())
     finally:
+        release_single_instance(activation_handle)
         release_single_instance(instance_handle)

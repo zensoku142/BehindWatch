@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+ACTIVATION_EVENT = 'Local\\BehindWatch.ActivateWindow'
+
 
 def acquire_single_instance():
     import ctypes
@@ -32,6 +34,47 @@ def release_single_instance(handle):
         kernel32 = ctypes.WinDLL('kernel32')
         kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
         kernel32.CloseHandle(handle)
+
+
+def create_activation_event():
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32.CreateEventW.argtypes = (ctypes.c_void_p, wintypes.BOOL, wintypes.BOOL, wintypes.LPCWSTR)
+    kernel32.CreateEventW.restype = wintypes.HANDLE
+    handle = kernel32.CreateEventW(None, False, False, ACTIVATION_EVENT)
+    if not handle:
+        raise ctypes.WinError(ctypes.get_last_error())
+    return handle
+
+
+def signal_existing_instance():
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL('kernel32')
+    kernel32.OpenEventW.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.LPCWSTR)
+    kernel32.OpenEventW.restype = wintypes.HANDLE
+    kernel32.SetEvent.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    handle = kernel32.OpenEventW(0x0002, False, ACTIVATION_EVENT)  # EVENT_MODIFY_STATE
+    if not handle:
+        return False
+    try:
+        return bool(kernel32.SetEvent(handle))
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def activation_requested(handle):
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL('kernel32')
+    kernel32.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+    kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    return kernel32.WaitForSingleObject(handle, 0) == 0  # WAIT_OBJECT_0
 
 
 def ensure_runtime():
