@@ -69,6 +69,18 @@ jobs:
           if ($second.ExitCode -ne 0) { throw "Overwrite install failed: $($second.ExitCode)" }
           if (-not (Test-Path (Join-Path $installDir 'data/preserve-marker.txt'))) { throw 'Overwrite removed data' }
           python -c "import subprocess,sys; subprocess.run([sys.argv[1], '--smoke-test'], check=True, timeout=60)" (Join-Path $installDir 'BehindWatch.exe')
+      - name: Smoke test update handoff
+        shell: pwsh
+        run: |
+          $version = $env:RELEASE_TAG -replace '^v', ''
+          $setup = Resolve-Path "dist-installer/BehindWatch-Setup-v$version-x64.exe"
+          $installDir = Join-Path $env:RUNNER_TEMP 'BehindWatch Smoke Install'
+          $helperDir = Join-Path $env:RUNNER_TEMP 'BehindWatch Update Helper'
+          New-Item -ItemType Directory -Force $helperDir | Out-Null
+          $helper = Join-Path $helperDir 'BehindWatchUpdater.exe'
+          Copy-Item (Join-Path $installDir 'BehindWatchUpdater.exe') $helper
+          python -c "import subprocess,sys; old=subprocess.Popen([sys.executable,'-c','import time;time.sleep(5)']); subprocess.run([sys.argv[1],'--wait-pid',str(old.pid),'--installer',sys.argv[2]], check=True, timeout=180); old.wait()" $helper $setup
+          python -c "import subprocess,sys; subprocess.run([sys.argv[1], '--smoke-test'], check=True, timeout=60)" (Join-Path $installDir 'BehindWatch.exe')
       - name: Resolve release notes
         id: notes
         shell: pwsh
