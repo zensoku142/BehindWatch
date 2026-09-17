@@ -1,6 +1,6 @@
 # 来源与许可证
 
-- 当前人体检测权重为 [Ultralytics YOLO26s ONNX v8.4.0](https://github.com/ultralytics/assets/releases/tag/v8.4.0)，由 Ultralytics 以 AGPL-3.0 / 企业许可证双重授权；SHA-256 固定在下载脚本。AGPL-3.0 条款见 `packaging/licenses/AGPL-3.0.txt`。发布集成此权重的安装包前须核对整个项目的授权与源码提供要求。
+- 本项目自有代码按根目录 `LICENSE` 的 AGPL-3.0 条款发布，完整源码、构建脚本和模型下载校验信息在本仓库公开。当前人体检测权重为 [Ultralytics YOLO26s ONNX v8.4.0](https://github.com/ultralytics/assets/releases/tag/v8.4.0)，按 AGPL-3.0 使用；SHA-256 固定在下载脚本，安装包附有 `packaging/licenses/AGPL-3.0.txt`。
 - `core/vendor/yolox.py` 是此前复用的 [OpenCV Zoo YOLOX](https://github.com/opencv/opencv_zoo/tree/47534e27c9851bb1128ccc0102f1145e27f23f98/models/object_detection_yolox) 代码，固定提交 `47534e27c9851bb1128ccc0102f1145e27f23f98`，Apache-2.0；完整条款见 `core/vendor/LICENSE-YOLOX`。当前检测流程不调用该文件。
 - 人员跟踪调用 [Supervision 0.25.1](https://github.com/roboflow/supervision/tree/0.25.1) 中的 ByteTrack 实现（MIT），没有自行重写跟踪算法。应用仅使用本地推理、跟踪接口，不调用 Roboflow 云端服务。
 
@@ -14,4 +14,4 @@
 
 ## 安装版的依赖条款
 
-安装目录 `_internal/licenses/` 保留复用源码和构建环境中各依赖 wheel 自带的 LICENSE/COPYING/NOTICE。另附 Qt LGPL-3.0 与 GPL-3.0 原文，来源为 [Qt 6.11.2 的 LICENSES](https://github.com/qt/qtbase/tree/v6.11.2/LICENSES)。Qt 为独立动态库；本项目不修改 Qt/PySide6，源码和构建资料可从 [Qt](https://code.qt.io/cgit/qt/qtbase.git/) 与 [PySide](https://code.qt.io/cgit/pyside/pyside-setup.git/) 对应版本获取；许可说明见 [Qt for Python 官方页面](https://doc.qt.io/qtforpython-6/licenses.html)。依赖的许可证不代表本仓库的自有代码已整体授予同一许可证。
+安装目录 `_internal/licenses/` 保留复用源码和构建环境中各依赖 wheel 自带的 LICENSE/COPYING/NOTICE。另附 Qt LGPL-3.0 与 GPL-3.0 原文，来源为 [Qt 6.11.2 的 LICENSES](https://github.com/qt/qtbase/tree/v6.11.2/LICENSES)。Qt 为独立动态库；本项目不修改 Qt/PySide6，源码和构建资料可从 [Qt](https://code.qt.io/cgit/qt/qtbase.git/) 与 [PySide](https://code.qt.io/cgit/pyside/pyside-setup.git/) 对应版本获取；许可说明见 [Qt for Python 官方页面](https://doc.qt.io/qtforpython-6/licenses.html)。第三方依赖仍遵循各自的条款。

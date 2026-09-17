@@ -59,4 +59,4 @@ py -3.12 -m pip --python .venv/Scripts/python.exe install -r requirements-build.
 - [第三方来源与许可证](THIRD_PARTY_NOTICES.md)
 - [提交与发布规范](GIT_VERSION_AND_MERGE_RULES.md)
 
-检测使用 YOLO26s ONNX、Supervision ByteTrack、MediaPipe Face Landmarker 和 SFace；界面使用 PySide6。模型与复用代码的来源及许可证见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+检测使用 YOLO26s ONNX、Supervision ByteTrack、MediaPipe Face Landmarker 和 SFace；界面使用 PySide6。本项目自有代码按 [AGPL-3.0](LICENSE) 发布，模型与复用代码的来源及许可证见 [第三方声明](THIRD_PARTY_NOTICES.md)。
